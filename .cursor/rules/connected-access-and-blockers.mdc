@@ -9,5 +9,6 @@ alwaysApply: true
 - Diagnose access failures from the actual tool context. A restricted shell, DNS failure, or stale credential in one execution environment does not prove Kirat's own login failed. Check another authorized connection or network-enabled execution path before asking for help.
 - Never ask Kirat to paste tokens, passwords, recovery codes, or other secrets into chat. Prefer a connected provider integration or secure local credential store.
 - When a real access blocker remains, state the exact missing permission or action, why it blocks the requested outcome, and the smallest safe step Kirat can take. Continue any independent work while waiting.
+- Every request for Kirat to act must give the exact action, why it is needed, what it will change, and how success will be confirmed. Never give an ambiguous command or an unexplained step.
 - Keep working toward the user-visible outcome after reporting a blocker. Do not stop at an audit or hand off routine implementation steps to Kirat.
 - Ask for user intervention when access expires, required scopes are missing, or the provider requires an interactive step the agent cannot complete. Do not ask for repeated authentication when the user's existing login can be used through another approved tool.

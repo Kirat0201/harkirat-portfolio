@@ -101,6 +101,13 @@ export const contributions = [
     status: 'Merged',
   },
   {
+    title: 'Review retry recovery',
+    description: 'Added a bounded correction retry when a generated work review exceeds its validation limits.',
+    repository: 'Claude-Mem',
+    url: 'https://github.com/thedotmack/claude-mem/pull/5286',
+    status: 'Merged',
+  },
+  {
     title: 'Safer remote hook spool URLs',
     description: 'Validated configured worker URLs, required HTTPS for remote workers, and covered transport selection with focused tests.',
     repository: 'Claude-Mem',
@@ -112,6 +119,13 @@ export const contributions = [
     description: 'Moved SQLite-backed work-view projection off the HTTP event loop and added a bounded retry for oversized generated reviews.',
     repository: 'Claude-Mem',
     url: 'https://github.com/thedotmack/claude-mem/pull/5284',
+    status: 'Merged',
+  },
+  {
+    title: 'Keychain lookup diagnostics',
+    description: 'Improved macOS credential lookup recovery and made keychain failure diagnostics more useful.',
+    repository: 'Claude-Mem',
+    url: 'https://github.com/thedotmack/claude-mem/pull/5258',
     status: 'Merged',
   },
   {

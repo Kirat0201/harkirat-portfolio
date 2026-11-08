@@ -67,7 +67,7 @@ function HomePage({ theme, toggleTheme }: { theme: Theme; toggleTheme: () => voi
       <div className="hero-copy wrap">
         <p className="hero-kicker"><span className="status-dot" /> building at the intersection of systems and stories</p>
         <h1 id="hero-title">Curiosity,<br /><em>made useful.</em></h1>
-        <p className="hero-intro">Hey, I’m Kirat. I build thoughtful software across AI, research systems, and developer tools.</p>
+        <p className="hero-intro">I’m Kirat Singh. I build thoughtful software across AI, research systems, and developer tools.</p>
         <div className="hero-actions"><a className="button button-dark" href="#/projects">Explore projects <ArrowDownRight size={16} /></a><a className="text-link" href={profileLinks.linkedin} target="_blank" rel="noreferrer">Let’s connect <ArrowUpRight size={15} /></a></div>
       </div>
       <div className="hero-note"><span>01 / 04</span><span>an interactive koi pond</span><ArrowDown size={14} /></div>

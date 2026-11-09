@@ -254,9 +254,9 @@ function ProjectPage({ project, route, theme, toggleTheme }: { project: Project;
           <h1>{project.name}</h1>
           <p className="case-tagline">{project.description}</p>
           <p className="case-about">{project.detail}</p>
-          <a className="case-source" href={project.repository || '#/projects'} target={project.repository ? '_blank' : undefined} rel={project.repository ? 'noreferrer' : undefined}>
-            {project.repository ? new URL(project.repository).hostname.replace(/^www\./, '') : 'Private project · source not public'} <ArrowUpRight size={13} />
-          </a>
+          {project.repository
+            ? <a className="case-source" href={project.repository} target="_blank" rel="noreferrer">{new URL(project.repository).hostname.replace(/^www\./, '')} <ArrowUpRight size={13} /></a>
+            : <p className="case-source-note">Private project · source not public</p>}
         </header>
         <div className="case-details">
           <section className="case-section">

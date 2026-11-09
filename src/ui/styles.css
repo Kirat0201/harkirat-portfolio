@@ -97,6 +97,7 @@ button:focus-visible, a:focus-visible { outline: 1px solid color-mix(in srgb, va
 .case-tagline { margin: 0; color: var(--muted-color); font-size: 16px; }
 .case-about { margin: 2rem 0 0; font-size: 16px; line-height: 1.7; text-wrap: pretty; }
 .case-source { display: inline-flex; align-items: center; gap: .35rem; margin-top: 1rem; font-size: 14px; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--foreground-color) 28%, transparent); text-underline-offset: 4px; }
+.case-source-note { margin: 1rem 0 0; color: var(--muted-color); font-size: 14px; }
 .case-details { display: grid; grid-template-columns: 1fr 1.5fr; gap: 4.5rem 8%; padding: 4.5rem 0 5rem; }
 .case-section { min-width: 0; }
 .case-label { margin: 0 0 1rem; color: var(--muted-color); font: 400 12px/1.5 'Geist Mono', monospace; text-transform: lowercase; }

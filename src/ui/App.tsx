@@ -1,14 +1,26 @@
-import { useEffect, useState } from 'react'
-import { ArrowDown, ArrowDownRight, ArrowLeft, ArrowRight, ArrowUpRight, Github, Linkedin, Moon, Sun } from 'lucide-react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { ArrowLeft, ArrowRight, ArrowUpRight, Github, Linkedin, Moon, Sun } from 'lucide-react'
 import OceanCanvas from '../ocean/OceanCanvas'
 import { contributions, projects, type Project } from '../data/projects'
 
 type Theme = 'light' | 'dark'
-const profileLinks = { github: 'https://github.com/Kirat0201', linkedin: 'https://linkedin.com/in/harkiratsingh01/' }
-const readRoute = () => window.location.hash.replace(/^#/, '') || '/'
+type Route = '/' | '/projects' | '/contributions' | '/about' | string
+
+const profileLinks = {
+  github: 'https://github.com/Kirat0201',
+  linkedin: 'https://linkedin.com/in/harkiratsingh01/',
+}
+const navItems = [
+  { label: 'pond', href: '/' },
+  { label: 'projects', href: '/projects' },
+  { label: 'open source', href: '/contributions' },
+  { label: 'about', href: '/about' },
+]
+
+const readRoute = (): Route => window.location.hash.replace(/^#/, '') || '/'
 
 function useRoute() {
-  const [route, setRoute] = useState(readRoute)
+  const [route, setRoute] = useState<Route>(readRoute)
   useEffect(() => {
     const sync = () => setRoute(readRoute())
     window.addEventListener('hashchange', sync)
@@ -18,9 +30,9 @@ function useRoute() {
   return route
 }
 
-function ProjectArt({ project }: { project: Project }) {
+function ProjectArt({ project, className = '' }: { project: Project; className?: string }) {
   return (
-    <div className={`project-art art-${project.visual}`} aria-hidden="true">
+    <div className={'project-art art-' + project.visual + ' ' + className} aria-hidden="true">
       {project.visual === 'recruitsage' && <>
         <div className="art-window"><div className="art-window-bar"><i /><i /><i /><span>career / briefing</span></div><div className="art-window-content"><small>ROLE MATCH · EVIDENCE</small><strong>Product engineer</strong><div className="art-line wide" /><div className="art-line" /><div className="art-pills"><i /><i /><i /></div><div className="art-evidence"><b>01</b><span>source linked</span><ArrowUpRight size={13} /></div></div></div>
         <span className="art-orbit orbit-a" /><span className="art-orbit orbit-b" />
@@ -34,81 +46,310 @@ function ProjectArt({ project }: { project: Project }) {
       {project.visual === 'security' && <>
         <div className="terminal-card"><div className="terminal-title"><span>auth.log</span><b>● ● ●</b></div><p><i>18:42:01</i> failed password · 185.220.101.45</p><p><i>18:42:04</i> failed password · 185.220.101.45</p><p><i>18:42:08</i> failed password · 45.155.205.33</p><div className="terminal-result"><b>2</b><span>sources flagged</span><span className="severity">REVIEW</span></div></div>
       </>}
-      <span className="art-index">{project.slug === 'recruitsage' ? '01' : project.slug === 'induss' ? '02' : project.slug === 'mathdotconnect' ? '03' : '04'}</span>
     </div>
   )
 }
 
-function ProjectCard({ project }: { project: Project }) {
+function ThemeButton({ theme, toggleTheme }: { theme: Theme; toggleTheme: () => void }) {
   return (
-    <article className="project-card">
-      <a className="project-card-link" href={`#/projects/${project.slug}`} aria-label={`Read the ${project.name} case study`}>
-        <ProjectArt project={project} />
-        <div className="project-card-copy">
-          <div className="project-card-meta"><span>{project.type}</span><span>{project.year}</span></div>
-          <h3>{project.name}<ArrowUpRight size={17} /></h3>
-          <p>{project.description}</p>
-          <div className="tags">{project.stack.slice(0, 4).map((tag) => <span key={tag}>{tag}</span>)}</div>
+    <button className="theme-button" type="button" onClick={toggleTheme} aria-label={'Switch to ' + (theme === 'light' ? 'dark' : 'light') + ' theme'}>
+      {theme === 'light' ? <Moon size={15} strokeWidth={1.6} /> : <Sun size={15} strokeWidth={1.6} />}
+    </button>
+  )
+}
+
+function TopNav({ route, theme, toggleTheme, overCover = false }: { route: Route; theme: Theme; toggleTheme: () => void; overCover?: boolean }) {
+  const page = route === '/' ? '/' : '/' + route.split('/')[1]
+  return (
+    <nav className={'top-nav' + (overCover ? ' top-nav-cover' : '')} aria-label="Main">
+      {navItems.map((item) => (
+        <a key={item.href} href={'#' + item.href} aria-current={page === item.href ? 'page' : undefined} className={page === item.href ? 'active' : ''}>
+          {item.label}
+        </a>
+      ))}
+      <ThemeButton theme={theme} toggleTheme={toggleTheme} />
+    </nav>
+  )
+}
+
+function MobileNav({ theme, toggleTheme, route }: { theme: Theme; toggleTheme: () => void; route: Route }) {
+  const [open, setOpen] = useState(false)
+  useEffect(() => setOpen(false), [route])
+
+  return (
+    <>
+      <button className="mobile-nav-pill" type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label={open ? 'Close navigation' : 'Open navigation'}>
+        <span>Harkirat Singh</span>
+        <span className={'menu-mark' + (open ? ' menu-mark-open' : '')}><i /><i /><i /><i /></span>
+      </button>
+      <div className={'mobile-menu' + (open ? ' mobile-menu-open' : '')} aria-hidden={!open}>
+        <nav aria-label="Mobile main">
+          {navItems.map((item, index) => (
+            <a key={item.href} href={'#' + item.href} tabIndex={open ? 0 : -1} style={{ transitionDelay: open ? (index * 65) + 'ms' : '0ms' }}>
+              {item.label === 'pond' ? 'Home' : item.label === 'open source' ? 'Open source' : item.label[0].toUpperCase() + item.label.slice(1)}
+            </a>
+          ))}
+        </nav>
+        <div className="mobile-menu-bottom">
+          <a href={profileLinks.linkedin} target="_blank" rel="noreferrer">LinkedIn <ArrowUpRight size={13} /></a>
+          <a href={profileLinks.github} target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={13} /></a>
+          <ThemeButton theme={theme} toggleTheme={toggleTheme} />
         </div>
+      </div>
+    </>
+  )
+}
+
+function SocialLinks() {
+  return (
+    <p className="social-links">
+      <a href={profileLinks.github} target="_blank" rel="noreferrer">github</a>
+      <span>/</span>
+      <a href={profileLinks.linkedin} target="_blank" rel="noreferrer">linkedin</a>
+    </p>
+  )
+}
+
+function HomePage({ theme, toggleTheme, route }: { theme: Theme; toggleTheme: () => void; route: Route }) {
+  return (
+    <div className="pond-home">
+      <OceanCanvas theme={theme} />
+      <MobileNav theme={theme} toggleTheme={toggleTheme} route={route} />
+      <TopNav route={route} theme={theme} toggleTheme={toggleTheme} />
+      <main className="pond-copy" data-koi-avoid>
+        <p className="pond-quote">curiosity, made useful.<span aria-hidden="true" /></p>
+        <div className="pond-profile">
+          <h1>Hi, I’m Harkirat.</h1>
+          <p>I study computer science at Thapar Institute of Engineering and Technology, and build software across AI, research systems, and developer tools.</p>
+          <p>Currently building independent projects and contributing to <a href="https://github.com/thedotmack/claude-mem" target="_blank" rel="noreferrer">Claude-Mem</a>.</p>
+          <SocialLinks />
+        </div>
+      </main>
+    </div>
+  )
+}
+
+function ProjectTile({ project }: { project: Project }) {
+  return (
+    <a className="project-tile" href={'#/projects/' + project.slug} aria-label={'View ' + project.name}>
+      <div className="project-tile-image">
+        <ProjectArt project={project} />
+        <span className="tile-action">view project</span>
+      </div>
+      <div className="project-tile-title">
+        <span>{project.name}</span>
+        <span className="project-year">{project.year}</span>
+      </div>
+      <p className="project-tagline">{project.description}</p>
+    </a>
+  )
+}
+
+function MobileProject({ project }: { project: Project }) {
+  return (
+    <article className="mobile-project">
+      <a className="mobile-project-image" href={'#/projects/' + project.slug} aria-label={'View ' + project.name}>
+        <ProjectArt project={project} />
       </a>
+      <h2>{project.name}</h2>
+      <p>{project.description}</p>
+      <div className="mobile-project-year"><span>Year</span><span>{project.year}</span></div>
+      <a className="view-project" href={'#/projects/' + project.slug}>View project</a>
     </article>
   )
 }
 
-function SectionHeading({ eyebrow, title, copy }: { eyebrow: string; title: string; copy?: string }) {
-  return <div className="section-heading"><div><p className="eyebrow">{eyebrow}</p><h2>{title}</h2></div>{copy && <p className="section-heading-copy">{copy}</p>}</div>
+function ProjectsPage({ route, theme, toggleTheme }: { route: Route; theme: Theme; toggleTheme: () => void }) {
+  const stripRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const strip = stripRef.current
+    if (!strip) return
+    const desktop = window.matchMedia('(min-width: 1024px)')
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+    let target = strip.scrollLeft
+    let raf = 0
+    const stop = () => {
+      window.cancelAnimationFrame(raf)
+      raf = 0
+    }
+    const glide = () => {
+      const before = strip.scrollLeft
+      strip.scrollLeft += (target - before) * 0.18
+      if (strip.scrollLeft === before || Math.abs(target - strip.scrollLeft) < 1) {
+        strip.scrollLeft = target
+        raf = 0
+        return
+      }
+      raf = window.requestAnimationFrame(glide)
+    }
+    const move = (delta: number) => {
+      const max = strip.scrollWidth - strip.clientWidth
+      target = Math.max(0, Math.min(max, (raf ? target : strip.scrollLeft) + delta))
+      if (reduced.matches) strip.scrollLeft = target
+      else if (!raf) raf = window.requestAnimationFrame(glide)
+    }
+    const onWheel = (event: WheelEvent) => {
+      if (!desktop.matches) return
+      const sideways = Math.abs(event.deltaX) > Math.abs(event.deltaY)
+      if (sideways && strip.contains(event.target as Node)) {
+        stop()
+        return
+      }
+      event.preventDefault()
+      const delta = sideways ? event.deltaX : event.deltaY
+      move(event.deltaMode === 1 ? delta * 16 : delta)
+    }
+    const onKey = (event: KeyboardEvent) => {
+      if (!desktop.matches || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return
+      const step = strip.clientWidth * 0.1
+      const amount = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? step
+        : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -step
+          : event.key === 'PageDown' || event.key === ' ' ? strip.clientWidth * 0.8
+            : event.key === 'PageUp' ? -strip.clientWidth * 0.8 : 0
+      if (!amount) return
+      if (event.key === ' ' && event.target instanceof HTMLButtonElement) return
+      event.preventDefault()
+      move(amount)
+    }
+    window.addEventListener('wheel', onWheel, { passive: false })
+    window.addEventListener('keydown', onKey)
+    return () => {
+      stop()
+      window.removeEventListener('wheel', onWheel)
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [])
+
+  return (
+    <div className="projects-view">
+      <MobileNav theme={theme} toggleTheme={toggleTheme} route={route} />
+      <TopNav route={route} theme={theme} toggleTheme={toggleTheme} />
+      <main className="projects-main">
+        <div className="projects-strip" ref={stripRef}>
+          {projects.map((project) => <ProjectTile key={project.slug} project={project} />)}
+        </div>
+        <div className="mobile-project-list">
+          {projects.map((project) => <MobileProject key={project.slug} project={project} />)}
+        </div>
+      </main>
+    </div>
+  )
 }
 
-function HomePage({ theme, toggleTheme }: { theme: Theme; toggleTheme: () => void }) {
-  return <>
-    <section className="hero" aria-labelledby="hero-title">
-      <OceanCanvas theme={theme} />
-      <div className="hero-wash" />
-      <div className="hero-copy wrap">
-        <p className="hero-kicker"><span className="status-dot" /> building at the intersection of systems and stories</p>
-        <h1 id="hero-title">Curiosity,<br /><em>made useful.</em></h1>
-        <p className="hero-intro">I’m Kirat Singh. I build thoughtful software across AI, research systems, and developer tools.</p>
-        <div className="hero-actions"><a className="button button-dark" href="#/projects">Explore projects <ArrowDownRight size={16} /></a><a className="text-link" href={profileLinks.linkedin} target="_blank" rel="noreferrer">Let’s connect <ArrowUpRight size={15} /></a></div>
+function ProjectPage({ project, route, theme, toggleTheme }: { project: Project; route: Route; theme: Theme; toggleTheme: () => void }) {
+  const index = projects.findIndex((item) => item.slug === project.slug)
+  const nextProject = projects[(index + 1) % projects.length]
+  return (
+    <div className="project-detail-page">
+      <MobileNav theme={theme} toggleTheme={toggleTheme} route={route} />
+      <TopNav route={route} theme={theme} toggleTheme={toggleTheme} overCover />
+      <div className="project-cover">
+        <ProjectArt project={project} />
+        <div className="cover-shade" />
       </div>
-      <div className="hero-note"><span>01 / 04</span><span>an interactive koi pond</span><ArrowDown size={14} /></div>
-      <button className="theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}>{theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}</button>
-    </section>
-    <section className="section wrap" id="selected-work">
-      <SectionHeading eyebrow="Selected work · 2025—26" title="Things I’ve been building" copy="A few projects where research, careful systems, and useful interfaces meet." />
-      <div className="project-grid">{projects.map((project) => <ProjectCard project={project} key={project.slug} />)}</div>
-      <div className="section-end"><span>More context, decisions, and implementation notes inside each project.</span><a href="#/projects">All projects <ArrowRight size={15} /></a></div>
-    </section>
-    <section className="interlude"><div className="wrap interlude-inner"><p className="eyebrow">A small note on how I work</p><p className="interlude-copy">I like early product stages, close feedback loops, and work that moves between <em>the user problem</em> and <em>the underlying system.</em></p><a href="#/about">A little more about me <ArrowUpRight size={15} /></a></div></section>
-    <section className="section wrap contribution-teaser"><SectionHeading eyebrow="Open source · Claude-Mem" title="Work that travels upstream" copy="I contribute reliability, security, and performance fixes to an open-source memory system for coding agents." /><a href="#/contributions" className="outline-link">See contributions <ArrowUpRight size={15} /></a></section>
-  </>
+      <main className="case-frame">
+        <header className="case-header">
+          <a className="back-to-projects" href="#/projects"><ArrowLeft size={15} /> Projects</a>
+          <h1>{project.name}</h1>
+          <p className="case-tagline">{project.description}</p>
+          <p className="case-about">{project.detail}</p>
+          <a className="case-source" href={project.repository || '#/projects'} target={project.repository ? '_blank' : undefined} rel={project.repository ? 'noreferrer' : undefined}>
+            {project.repository ? new URL(project.repository).hostname.replace(/^www\./, '') : 'Private project · source not public'} <ArrowUpRight size={13} />
+          </a>
+        </header>
+        <div className="case-details">
+          <section className="case-section">
+            <p className="case-label">The problem</p>
+            <p className="case-problem">{project.problem}</p>
+          </section>
+          <section className="case-section">
+            <p className="case-label">The approach</p>
+            <div className="approach-list">
+              {project.approach.map((item, itemIndex) => (
+                <div className="approach-row" key={item}><span>0{itemIndex + 1}</span><p>{item}</p></div>
+              ))}
+            </div>
+          </section>
+          <section className="case-section case-tools">
+            <p className="case-label">Tools and technologies</p>
+            <p>{project.stack.join(' · ')}</p>
+          </section>
+        </div>
+        <nav className="project-pager" aria-label="More projects">
+          <span className="case-label">Keep exploring</span>
+          <a href={'#/projects/' + nextProject.slug}>Next · {nextProject.name} <ArrowRight size={15} /></a>
+        </nav>
+      </main>
+    </div>
+  )
 }
 
-function PageIntro({ eyebrow, title, copy }: { eyebrow: string; title: string; copy: string }) {
-  return <div className="page-intro wrap"><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p>{copy}</p></div>
+function ContributionsPage({ route, theme, toggleTheme }: { route: Route; theme: Theme; toggleTheme: () => void }) {
+  return (
+    <PageLayout route={route} theme={theme} toggleTheme={toggleTheme}>
+      <header className="plain-header">
+        <p className="page-quote">useful work, shared upstream.<span aria-hidden="true" /></p>
+        <h1>Open-source contributions</h1>
+        <p>Recent changes to Claude-Mem, an open-source memory system for coding agents.</p>
+      </header>
+      <section className="contribution-list" aria-label="Merged Claude-Mem pull requests">
+        {contributions.map((item, index) => (
+          <article className="contribution-row" key={item.url}>
+            <span className="contribution-number">0{index + 1}</span>
+            <div><h2>{item.title}</h2><p>{item.description}</p></div>
+            <a href={item.url} target="_blank" rel="noreferrer">{item.status} <ArrowUpRight size={13} /></a>
+          </article>
+        ))}
+      </section>
+    </PageLayout>
+  )
 }
 
-function ProjectsPage() {
-  return <><PageIntro eyebrow="Selected work · 2025—26" title="Projects" copy="A closer look at the questions, decisions, and systems behind the work." /><section className="wrap page-section"><div className="project-grid">{projects.map((project) => <ProjectCard project={project} key={project.slug} />)}</div></section></>
+function AboutPage({ route, theme, toggleTheme }: { route: Route; theme: Theme; toggleTheme: () => void }) {
+  return (
+    <PageLayout route={route} theme={theme} toggleTheme={toggleTheme}>
+      <header className="plain-header">
+        <p className="page-quote">curiosity, made useful.<span aria-hidden="true" /></p>
+        <h1>About</h1>
+        <p>I’m Harkirat Singh, a computer science student at Thapar Institute of Engineering and Technology.</p>
+      </header>
+      <section className="about-content">
+        <div>
+          <p className="case-label">What I work on</p>
+          <p>I build software across AI, research systems, and developer tools. I’m drawn to early product work, clear evidence, and interfaces that help people understand what a system is doing.</p>
+          <p>My recent projects include RecruitSage, INDUSS, MathDotConnect, and SSHSentry. I also contribute reliability and interface improvements to Claude-Mem.</p>
+        </div>
+        <aside>
+          <p className="case-label">Elsewhere</p>
+          <a href={profileLinks.github} target="_blank" rel="noreferrer"><Github size={15} /> GitHub <ArrowUpRight size={13} /></a>
+          <a href={profileLinks.linkedin} target="_blank" rel="noreferrer"><Linkedin size={15} /> LinkedIn <ArrowUpRight size={13} /></a>
+        </aside>
+      </section>
+    </PageLayout>
+  )
 }
 
-function ProjectPage({ project }: { project: Project }) {
-  return <>
-    <section className="case-hero wrap"><a className="back-link" href="#/projects"><ArrowLeft size={15} /> All projects</a><p className="eyebrow">{project.type} <span className="eyebrow-divider">/</span> {project.year}</p><h1>{project.name}</h1><p className="case-lede">{project.description}</p><ProjectArt project={project} /><div className="case-links">{project.repository ? <a className="outline-link" href={project.repository} target="_blank" rel="noreferrer">View source <ArrowUpRight size={15} /></a> : <span className="private-note">Private project · source not public</span>}<span>{project.stack.join(' · ')}</span></div></section>
-    <section className="wrap case-body"><div className="case-block"><p className="eyebrow">The problem</p><p className="case-paragraph">{project.problem}</p></div><div className="case-block"><p className="eyebrow">The approach</p><div className="approach-list">{project.approach.map((item, index) => <div className="approach-item" key={item}><span>0{index + 1}</span><p>{item}</p></div>)}</div></div><div className="case-block case-stack"><p className="eyebrow">Tools and technologies</p><div className="tags">{project.stack.map((item) => <span key={item}>{item}</span>)}</div></div></section>
-    <section className="case-next wrap"><span className="eyebrow">Keep exploring</span><a href={`#/projects/${projects[(projects.findIndex((item) => item.slug === project.slug) + 1) % projects.length].slug}`}>Next project <ArrowRight size={16} /></a></section>
-  </>
+function PageLayout({ route, theme, toggleTheme, children }: { route: Route; theme: Theme; toggleTheme: () => void; children: ReactNode }) {
+  return (
+    <div className="plain-page">
+      <MobileNav theme={theme} toggleTheme={toggleTheme} route={route} />
+      <TopNav route={route} theme={theme} toggleTheme={toggleTheme} />
+      <main className="plain-frame">{children}</main>
+    </div>
+  )
 }
 
-function ContributionsPage() {
-  return <><PageIntro eyebrow="Open source · upstream contributions" title="Build in the open." copy="I contribute to Claude-Mem, an open-source memory system for coding agents. My recent work focuses on observer reliability, safer worker communication, and keeping the interface responsive." /><section className="wrap page-section"><div className="contribution-header"><div><p className="eyebrow">Claude-Mem</p><h2>Small fixes, real systems.</h2></div><a className="outline-link" href="https://github.com/thedotmack/claude-mem" target="_blank" rel="noreferrer">Project source <ArrowUpRight size={15} /></a></div><div className="contribution-list">{contributions.map((item, index) => <article className="contribution-row" key={item.url}><span className="contribution-index">0{index + 1}</span><div><h3>{item.title}</h3><p>{item.description}</p></div><a href={item.url} target="_blank" rel="noreferrer" aria-label={`View merged pull request: ${item.title}`}>{item.status} <ArrowUpRight size={14} /></a></article>)}</div></section></>
-}
-
-function AboutPage() {
-  return <><PageIntro eyebrow="A bit about me" title="Good work starts with a useful question." copy="I’m Kirat Singh, a computer science student at Thapar Institute of Engineering and Technology. I enjoy building software that makes complex work easier to inspect and act on." /><section className="wrap about-layout"><div className="about-main"><p className="eyebrow">What I’m drawn to</p><p className="about-statement">Early product stages. Clear ownership. Fast feedback. The satisfying middle ground where a real user problem meets a well-designed system.</p><p>I’ve worked across AI integrations, financial research tools, security utilities, and learning interfaces. Along the way, I’ve contributed improvements to open-source projects including Claude-Mem.</p></div><aside className="about-aside"><p className="eyebrow">Elsewhere</p><a href={profileLinks.github} target="_blank" rel="noreferrer"><Github size={16} /> GitHub <ArrowUpRight size={14} /></a><a href={profileLinks.linkedin} target="_blank" rel="noreferrer"><Linkedin size={16} /> LinkedIn <ArrowUpRight size={14} /></a><a href="#/projects">Browse selected work <ArrowUpRight size={14} /></a></aside></section></>
-}
-
-function NotFound() {
-  return <div className="not-found wrap"><p className="eyebrow">A little off course</p><h1>That page isn’t here.</h1><a className="outline-link" href="#/projects">Back to projects <ArrowLeft size={15} /></a></div>
+function NotFound({ route, theme, toggleTheme }: { route: Route; theme: Theme; toggleTheme: () => void }) {
+  return (
+    <PageLayout route={route} theme={theme} toggleTheme={toggleTheme}>
+      <header className="plain-header">
+        <p className="page-quote">a little off course.<span aria-hidden="true" /></p>
+        <h1>Page not found</h1>
+        <a className="back-to-projects" href="#/projects"><ArrowLeft size={15} /> Projects</a>
+      </header>
+    </PageLayout>
+  )
 }
 
 export default function App() {
@@ -116,14 +357,16 @@ export default function App() {
   const [theme, setTheme] = useState<Theme>(() => {
     try { return window.localStorage.getItem('theme') === 'light' ? 'light' : 'dark' } catch { return 'dark' }
   })
-  useEffect(() => { try { window.localStorage.setItem('theme', theme) } catch { /* Storage may be unavailable. */ } }, [theme])
+  useEffect(() => {
+    try { window.localStorage.setItem('theme', theme) } catch { /* Storage may be unavailable. */ }
+  }, [theme])
   const toggleTheme = () => setTheme((current) => current === 'light' ? 'dark' : 'light')
   const project = route.startsWith('/projects/') ? projects.find((item) => item.slug === route.split('/')[2]) : undefined
-  const page = route === '/' ? 'home' : route.split('/')[1]
 
-  return <main className={`site theme-${theme}`}>
-    <header className="topbar wrap"><a className="wordmark" href="#/" aria-label="Kirat Singh home">KS<span>.</span></a><nav className="navigation" aria-label="Main navigation"><a className={page === 'projects' ? 'active' : ''} href="#/projects">Projects</a><a className={page === 'contributions' ? 'active' : ''} href="#/contributions">Open source</a><a className={page === 'about' ? 'active' : ''} href="#/about">About</a><a className="nav-contact" href={profileLinks.linkedin} target="_blank" rel="noreferrer">Contact <ArrowUpRight size={13} /></a></nav></header>
-    {route === '/' ? <HomePage theme={theme} toggleTheme={toggleTheme} /> : route === '/projects' ? <ProjectsPage /> : route === '/contributions' ? <ContributionsPage /> : route === '/about' ? <AboutPage /> : project ? <ProjectPage project={project} /> : <NotFound />}
-    <footer className="footer"><div className="wrap footer-inner"><a className="wordmark" href="#/">KS<span>.</span></a><span>Made slowly, with curiosity.</span><div><a href={profileLinks.github} target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={13} /></a><a href={profileLinks.linkedin} target="_blank" rel="noreferrer">LinkedIn <ArrowUpRight size={13} /></a></div><span className="footer-year">© 2026</span></div></footer>
-  </main>
+  if (route === '/') return <div className={'site theme-' + theme}><HomePage route={route} theme={theme} toggleTheme={toggleTheme} /></div>
+  if (route === '/projects') return <div className={'site theme-' + theme}><ProjectsPage route={route} theme={theme} toggleTheme={toggleTheme} /></div>
+  if (route === '/contributions') return <div className={'site theme-' + theme}><ContributionsPage route={route} theme={theme} toggleTheme={toggleTheme} /></div>
+  if (route === '/about') return <div className={'site theme-' + theme}><AboutPage route={route} theme={theme} toggleTheme={toggleTheme} /></div>
+  if (project) return <div className={'site theme-' + theme}><ProjectPage project={project} route={route} theme={theme} toggleTheme={toggleTheme} /></div>
+  return <div className={'site theme-' + theme}><NotFound route={route} theme={theme} toggleTheme={toggleTheme} /></div>
 }

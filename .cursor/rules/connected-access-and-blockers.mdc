@@ -10,5 +10,6 @@ alwaysApply: true
 - Never ask Kirat to paste tokens, passwords, recovery codes, or other secrets into chat. Prefer a connected provider integration or secure local credential store.
 - When a real access blocker remains, state the exact missing permission or action, why it blocks the requested outcome, and the smallest safe step Kirat can take. Continue any independent work while waiting.
 - Every request for Kirat to act must give the exact action, why it is needed, what it will change, and how success will be confirmed. Never give an ambiguous command or an unexplained step.
+- Prefer terminal commands, official CLIs, APIs, and connected integrations for work and for any action Kirat needs to take. Use a web UI only when no supported CLI, API, or integration workaround can complete the task. Explain why the UI is required and give the exact steps.
 - Keep working toward the user-visible outcome after reporting a blocker. Do not stop at an audit or hand off routine implementation steps to Kirat.
 - Ask for user intervention when access expires, required scopes are missing, or the provider requires an interactive step the agent cannot complete. Do not ask for repeated authentication when the user's existing login can be used through another approved tool.

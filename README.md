@@ -1,4 +1,4 @@
-# Kirat Singh’s portfolio
+# Kirat’s portfolio
 
 A personal portfolio featuring selected software projects, open-source contributions, and an interactive koi pond.
 
